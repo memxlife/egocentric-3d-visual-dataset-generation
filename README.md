@@ -22,60 +22,19 @@ The first backend in this repo is `mock`, which creates deterministic synthetic 
 the same file layout as the real generator. It is intentionally simple so we can test schema,
 sharding, validation, and remote job orchestration before installing heavier simulators.
 
-## Remote-First Quick Start
+## Documentation
+
+The project separates three document types:
+
+- dataset specification: [`docs/spec/README.md`](docs/spec/README.md)
+- implementation roadmap: [`docs/implementation/roadmap.md`](docs/implementation/roadmap.md)
+- remote runbooks: [`docs/runbook/remote_5090.md`](docs/runbook/remote_5090.md),
+  [`docs/runbook/smoke_tests.md`](docs/runbook/smoke_tests.md), and
+  [`docs/runbook/preview_generation.md`](docs/runbook/preview_generation.md)
 
 All smoke tests and dataset generation runs should execute on the remote RTX 5090 server. Local
 commands are for editing code and static checks only; do not treat local generated data as research
 evidence.
-
-Configure the server:
-
-```bash
-export EGO5090_HOST="user@host"
-export EGO5090_WORKDIR="/path/on/server/egocentric-dataset-toolchain"
-export EGO5090_DATASET_ROOT="/path/on/server/datasets/ego_phase1"
-export EGO5090_CUDA_VISIBLE_DEVICES="4,5,6,7"
-```
-
-Run setup and the scenario-card smoke test:
-
-```bash
-scripts/remote_setup_5090.sh
-scripts/remote_generate.sh configs/phase1_desk_mock.yaml 4 12 scenario_smoke
-```
-
-After AI2-THOR is installed on the remote server, run the real simulator smoke:
-
-```bash
-scripts/remote_generate.sh configs/phase1_ai2thor_smoke.yaml 1 8 ai2thor_smoke
-```
-
-After ProcTHOR is available through `prior`, run the procedural-house smoke:
-
-```bash
-scripts/remote_generate.sh configs/phase1_procthor_smoke.yaml 1 8 procthor_smoke
-```
-
-Build a static visual preview on the remote server:
-
-```bash
-ssh "$EGO5090_HOST" \
-  "cd '$EGO5090_WORKDIR' && . .venv/bin/activate && egodata preview \
-    --dataset '$EGO5090_DATASET_ROOT/procthor_smoke' \
-    --output '$EGO5090_DATASET_ROOT/previews/procthor_smoke' \
-    --max-episodes 8 --max-frames 12"
-```
-
-Serve the preview from the remote server and access it through an SSH tunnel:
-
-```bash
-ssh "$EGO5090_HOST" \
-  "cd '$EGO5090_DATASET_ROOT/previews/procthor_smoke' && python -m http.server 8899"
-
-ssh -L 8899:127.0.0.1:8899 "$EGO5090_HOST"
-```
-
-Then open `http://127.0.0.1:8899`.
 
 Expected remote output layout:
 
@@ -99,8 +58,6 @@ ${EGO5090_DATASET_ROOT}/scenario_smoke/
         000000.semantic.png
         000000.instance.png
 ```
-
-Once SSH details are known, the same workflow can install `.[ai2thor]` and run a ProcTHOR backend.
 
 ## Architecture
 

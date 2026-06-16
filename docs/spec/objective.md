@@ -6,6 +6,12 @@ The dataset trains models that learn visual-spatial dynamics from egocentric cam
 model observes a visual stream from a moving camera and uses known camera motion to predict future
 visual observations or infer persistent three-dimensional semantic structure.
 
+Version 1 isolates one core learning problem: how a model learns persistent 3D semantic structure
+from egocentric visual changes caused purely by camera motion. By keeping the world static, the
+dataset removes confounding factors from object dynamics and contact physics. Therefore, when the
+visual stream changes, the only valid explanation is the camera's changing viewpoint with respect
+to a persistent scene.
+
 The first-stage problem is:
 
 ```text
@@ -14,6 +20,14 @@ static 3D indoor world + moving egocentric camera -> spatially grounded visual s
 
 No object manipulation, object motion, physical interaction, or task execution is required in
 Version 1.
+
+The central research claim is:
+
+```text
+Given past egocentric observations and known camera motion,
+a model should learn to predict future visual observations
+and infer stable 3D semantic structure in a static indoor environment.
+```
 
 ## Generative Model
 
@@ -106,3 +120,7 @@ The dataset fails if it fails any of the four top-level requirements:
 
 Version 1 is successful if it produces useful motion-conditioned visual transformations from static
 indoor worlds. It does not need manipulation or real-robot deployment evidence yet.
+
+The dataset should not be used to claim that a model understands object dynamics, contact physics,
+robot control, or task execution. Those claims require later dataset versions with moving objects,
+actions, and real or simulated interaction evidence.

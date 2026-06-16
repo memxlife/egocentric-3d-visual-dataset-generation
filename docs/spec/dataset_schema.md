@@ -14,17 +14,20 @@ dataset_root/
     episode_manifest.jsonl
     object_taxonomy.json
     action_space.json
+    schema_version.json
   scenes/
     scene_000001/
       scene.json
       world.json
       object_metadata.json
       validation.json
+      probe_views/
   episodes/
     episode_000000001/
       episode.json
       trajectory.parquet
       camera_intrinsics.json
+      quality_metrics.json
       frames/
         000000.rgb.webp
         000000.depth.png
@@ -38,54 +41,78 @@ dataset_root/
     train.txt
     val_seen_category.txt
     test_scene_held_out.txt
-    test_object_held_out.txt
+    test_object_category_held_out.txt
+    test_object_instance_held_out.txt
     test_layout_held_out.txt
     test_trajectory_held_out.txt
+    test_material_held_out.txt
+    test_cross_scenario.txt
 ```
 
 The exact file formats may change for storage efficiency, but the information must be preserved.
 
-## Minimal Frame Fields
+## Coordinate Conventions
 
-Version 1 mandatory frame fields:
+All position units are meters. The canonical pose is:
 
-- RGB;
-- depth;
-- camera pose;
-- camera intrinsics;
-- frame index or timestamp;
-- semantic segmentation;
-- instance segmentation;
-- visible object identifiers.
+```text
+T_wc: camera-to-world transform
+```
 
-Preferred full frame fields:
+`T_wc` maps points from camera coordinates to world coordinates. If a backend natively reports
+world-to-camera or a different handedness, the writer must convert or explicitly record the backend
+convention in metadata.
 
-- RGB;
-- depth;
-- surface normals;
-- semantic segmentation;
-- instance segmentation;
-- pixel-to-3D correspondence map;
-- visible surface ids;
-- visible object ids;
-- optional optical flow to adjacent frames.
+Canonical pose should store:
 
-## Camera Pose
+- metric position in world coordinates;
+- quaternion orientation as `xyzw`;
+- optional yaw/pitch/roll for debugging;
+- frame index and timestamp;
+- backend pose fields for traceability when useful.
 
-Canonical pose should use metric position and quaternion orientation:
+Example:
 
 ```json
 {
   "frame_id": 0,
   "timestamp": 0.0,
+  "T_convention": "T_wc_camera_to_world",
   "position_m": [0.0, 1.2, 2.4],
   "orientation_quaternion_xyzw": [0.0, 0.0, 0.0, 1.0],
-  "yaw_pitch_roll_degrees": [0.0, 0.0, 0.0],
+  "yaw_pitch_roll_degrees_debug": [0.0, 0.0, 0.0],
   "fov_degrees": 60.0
 }
 ```
 
-Yaw, pitch, and roll are for debugging. Quaternion orientation is canonical.
+The camera coordinate frame must be declared in `schema_version.json`. If the renderer uses a
+different axis convention, the dataset must state whether camera coordinates use `+x` right, `+y`
+up or down, and `+z` forward or backward.
+
+## Depth Encoding
+
+Depth must be unambiguous.
+
+Each dataset version must declare:
+
+- depth units, normally meters;
+- file format and dtype;
+- near and far clipping planes;
+- invalid depth value;
+- whether depth is metric z-depth or ray distance;
+- whether depth is in camera coordinates or converted from renderer output.
+
+Recommended Version 1 fields:
+
+```json
+{
+  "depth_units": "meters",
+  "depth_type": "metric_z_depth",
+  "invalid_depth_value": 0,
+  "near_clip_m": 0.05,
+  "far_clip_m": 20.0
+}
+```
 
 ## Camera Intrinsics
 
@@ -113,6 +140,55 @@ K = [[fx, 0, cx],
      [0, 0, 1]]
 ```
 
+## Segmentation And Object ID Stability
+
+Semantic classes must come from `metadata/object_taxonomy.json`. Instance IDs must be stable within
+one static scene.
+
+Required guarantees:
+
+- semantic class ids are stable across the dataset version;
+- object instance ids are stable across frames in a sequence;
+- object instance ids are stable across episodes generated from the same static scene;
+- regenerated scenes with the same scene seed should produce the same object ids when the backend
+  supports deterministic generation;
+- visible object ids mean object instances with at least `min_object_pixels` visible pixels unless
+  otherwise stated.
+
+The schema should distinguish:
+
+```text
+semantic_class_id
+scene_object_id
+episode_visible_object_id
+backend_object_id
+```
+
+## Minimal Frame Fields
+
+Version 1 mandatory frame fields:
+
+- RGB;
+- depth;
+- camera pose;
+- camera intrinsics;
+- frame index or timestamp;
+- semantic segmentation;
+- instance segmentation;
+- visible object identifiers.
+
+Preferred full frame fields:
+
+- RGB;
+- depth;
+- surface normals;
+- semantic segmentation;
+- instance segmentation;
+- pixel-to-3D correspondence map;
+- visible surface ids;
+- visible object ids;
+- optional optical flow to adjacent frames.
+
 ## Static Scene Metadata
 
 Scene metadata must include:
@@ -126,7 +202,8 @@ Scene metadata must include:
 - free-space summary;
 - lighting profile;
 - accepted/rejected state;
-- scene validation scores.
+- scene validation scores;
+- rejection reason codes when rejected.
 
 Object metadata must include:
 
@@ -153,10 +230,12 @@ Each episode must store:
 - sequence id;
 - static scene id;
 - selected semantic anchor;
+- object-aware start parameters;
 - camera poses;
 - relative motions;
 - camera intrinsics;
 - action or primitive sequence;
+- primitive parameters;
 - quality scores;
 - acceptance/rejection reasons;
 - paths to frame annotations.
@@ -172,3 +251,32 @@ The target is:
 ```text
 I_k+1:H
 ```
+
+## Seed Semantics
+
+Every generated object must be reproducible from explicit seeds:
+
+| Seed | Controls |
+|---|---|
+| dataset seed | High-level split and batch sampling. |
+| scenario seed | Scenario family and layout-template sampling. |
+| scene seed | Static scene content, object placement, materials, lighting. |
+| episode seed | Anchor, start pose, primitive, and trajectory parameters. |
+| render seed | Any stochastic renderer effects if enabled. |
+
+If a backend cannot guarantee exact regeneration, the dataset must record backend version, asset
+version, and enough metadata to explain the difference.
+
+## Schema Versioning
+
+Each dataset root must include `metadata/schema_version.json` with:
+
+- schema version;
+- generator git commit;
+- backend name and version;
+- asset source and version;
+- coordinate convention;
+- depth convention;
+- taxonomy version;
+- split policy version;
+- metric threshold version.

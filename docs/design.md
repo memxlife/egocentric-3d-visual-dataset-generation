@@ -312,8 +312,8 @@ Decision rules:
 Scale ladder:
 
 ```text
-local smoke: 3 to 10 episodes
-remote smoke: 10 to 100 episodes
+remote schema smoke: 3 to 10 episodes
+remote simulator smoke: 10 to 100 episodes
 micro dataset: 100 to 1,000 episodes
 pilot dataset: 10,000 episodes
 phase-one dataset: 100,000+ episodes
@@ -829,7 +829,7 @@ Implementation contract:
 
 Pass condition:
 
-- local smoke tests finish in minutes;
+- remote schema smoke tests finish in minutes;
 - remote fast-profile generation reaches enough valid frames per second to make million-frame
   experiments practical;
 - high-fidelity rendering is used only when the fast profile has already answered a research

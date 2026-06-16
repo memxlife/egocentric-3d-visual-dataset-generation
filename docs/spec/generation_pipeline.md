@@ -2,48 +2,40 @@
 
 ## Overview
 
-Generation is a gated process. The system should reject bad static scenes before rendering expensive
-clips and reject bad candidate trajectories before final-resolution rendering.
+Generation is a gated process. The system should reject bad static scenes before trajectory
+sampling, reject bad candidate trajectories before final-resolution rendering, and run post-write
+validation after outputs are stored.
 
-## Static Scene Pipeline
+The pipeline has three validation layers:
+
+| Layer | When it runs | What it prevents |
+|---|---|---|
+| scene validation | Before trajectory sampling. | Bad worlds, missing required content, invalid support, no useful viewpoints. |
+| candidate trajectory validation | Before final rendering. | Collision, weak visual content, jitter, copy-forward clips. |
+| post-render dataset validation | After final outputs are written. | Broken files, missing metadata, schema violations, corrupt annotations. |
+
+## End-To-End Pipeline
 
 1. Sample scenario family.
 2. Sample layout template.
-3. Sample clutter level.
-4. Sample required object categories.
-5. Sample optional and distractor categories.
-6. Sample object mesh or procedural geometry.
-7. Sample object scale, shape variant, and pose.
-8. Place large furniture and support structures.
-9. Place required objects.
-10. Place optional objects.
-11. Place clutter objects.
-12. Resolve collisions and support constraints.
-13. Assign material, texture, color, and surface properties.
-14. Assign static object states.
-15. Generate occupancy field.
-16. Generate free-space field.
-17. Render low-resolution probe views.
-18. Score semantic completeness, physical plausibility, visual richness, free-space, and appearance
-    diversity.
-19. Accept or reject static scene.
-20. Pass accepted scene to trajectory generation.
-
-## Trajectory Pipeline
-
-1. Select accepted static scene.
-2. Build or load occupancy and free-space representation.
-3. Select semantic anchor.
-4. Sample valid object-aware starting pose.
-5. Sample a smooth motion primitive or primitive composition.
-6. Check free-space poses and swept path.
-7. Render cheap validation preview.
-8. Compute visual-content metrics.
-9. Compute local continuity metrics.
-10. Compute global sequence-change metrics.
-11. Accept or reject candidate sequence.
-12. Final-render accepted sequence.
-13. Store frames, pose, intrinsics, annotations, metadata, and quality scores.
+3. Instantiate required structures and support surfaces.
+4. Place required objects under support and co-occurrence constraints.
+5. Add optional and distractor objects.
+6. Assign material, texture, color, state, and lighting.
+7. Build occupancy and free-space fields.
+8. Render low-resolution probe views.
+9. Apply static scene acceptance.
+10. Select semantic anchors.
+11. Sample object-aware starts.
+12. Generate candidate motion primitives.
+13. Validate free-space poses and swept path.
+14. Render low-resolution preview.
+15. Compute visual-content, continuity, and global-change metrics.
+16. Accept or reject candidate sequence.
+17. Final-render accepted sequence.
+18. Write frames, annotations, pose, intrinsics, metadata, and quality scores.
+19. Run post-write integrity validation.
+20. Add accepted episode to manifests and preview dashboard.
 
 ## Two-Stage Rendering
 
@@ -56,25 +48,30 @@ candidate scene/trajectory
   -> final-resolution render only if accepted
 ```
 
-This prevents final rendering from being dominated by invalid, empty, or redundant clips.
+This prevents final rendering from being dominated by invalid, empty, redundant, or physically
+impossible clips.
 
-## Remote Execution Rule
+## Rejection Metadata
 
-All dataset generation, simulator tests, and preview generation should run on the remote RTX 5090
-server. Local runs are for source editing and static checks only.
+Every rejected candidate should keep enough information to debug the rejection:
 
-Default GPU reservation:
+- static scene id;
+- scenario family and layout template;
+- anchor id and category;
+- start parameters;
+- primitive type and parameters;
+- failed metric names;
+- rejection reason codes;
+- probe or preview frame paths when available.
 
-```text
-CUDA_VISIBLE_DEVICES=4,5,6,7
-```
+Rejected examples are not training data, but they are critical calibration evidence.
 
 ## Scale Ladder
 
 Use this ladder:
 
 ```text
-remote schema smoke: 3-10 episodes
+schema smoke: 3-10 episodes
 real simulator smoke: 1-5 episodes
 micro scene/trajectory pilot: 100-1,000 clips
 scenario pilot: 100-500 candidate static scenes
