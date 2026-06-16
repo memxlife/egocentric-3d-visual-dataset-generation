@@ -1,0 +1,48 @@
+id: desk_active_scan_mock
+name: Desk Active Scan Mock
+description: Lightweight card for local schema and metrics smoke tests.
+
+speed:
+  min_raw_frames_per_second: 1
+
+realism:
+  min_score: 0.75
+  required_object_groups:
+    - name: display
+      any_of: [monitor]
+    - name: input
+      any_of: [keyboard, mouse]
+    - name: clutter
+      any_of: [mug, phone, notebook, book, lamp]
+  hard_checks:
+    - name: support_relation_validity
+      mock_assume_passed: true
+    - name: collision_validity
+      mock_assume_passed: true
+
+coverage:
+  min_score: 0.65
+  required_actions: [MoveAhead, LookDown, RotateLeft, RotateRight]
+  required_visibility_events:
+    require_disappear_reappear: false
+  viewpoint_bins:
+    _min_unique_bins: 3
+    horizontal:
+      edges: [0.04, 0.08]
+      labels: [left, center, right]
+    pitch:
+      edges: [-1, 1]
+      labels: [down, level, up]
+  weights:
+    view: 0.35
+    motion: 0.25
+    visibility: 0.25
+    object: 0.15
+
+diversity:
+  min_episode_score: 1.0
+  required_episode_axes:
+    - scenario_card_id
+    - policy
+    - visible_categories
+    - trajectory_length

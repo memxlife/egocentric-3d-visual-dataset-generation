@@ -1,0 +1,40 @@
+dataset:
+  name: ego_phase1_procthor_smoke
+  version: 0.1.0
+  scenario_family: procthor_house_smoke
+  scenario_card: configs/scenarios/procthor_house_smoke.yaml
+  frame_rate: 10
+  resolution: [256, 256]
+  trajectory_length: 12
+  action_space: discrete_egocentric_v1
+  render_profile: ai2thor_cloud_rgbd_v1
+  agent_embodiment: ai2thor_agent_camera
+  annotations:
+    - rgb
+    - depth
+    - semantic
+    - instance
+    - pose
+    - action
+
+generation:
+  backend: procthor
+  scene_seed_start: 20000
+  episode_seed_start: 920000
+  episodes_per_scene: 1
+  backend_options:
+    scene_source: procthor
+    dataset: procthor-10k
+    split: train
+    start_index: 0
+    task_type: procthor_house_smoke
+  policy_mix:
+    scripted_active_scan: 1.0
+
+quality:
+  min_mean_motion: 0.0
+  min_visible_object_categories: 0
+  max_blank_rgb_fraction: 0.05
+
+objects:
+  taxonomy: {}

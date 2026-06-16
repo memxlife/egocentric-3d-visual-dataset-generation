@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Egocentric Dataset Spec</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fbfbfa;
+      --panel: #ffffff;
+      --ink: #202428;
+      --muted: #66707a;
+      --line: #d9dddf;
+      --link: #1769d1;
+      --link-bg: #eaf2ff;
+      --code: #f1f3f4;
+      --accent: #0f766e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.58;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+      padding: 22px 18px;
+    }
+    .brand {
+      margin: 0 0 18px;
+      font-size: 17px;
+      line-height: 1.25;
+      font-weight: 760;
+    }
+    nav { display: grid; gap: 4px; }
+    nav a {
+      display: block;
+      border-radius: 6px;
+      color: var(--ink);
+      padding: 8px 10px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    nav a:hover { background: var(--code); }
+    nav a.active {
+      background: var(--link-bg);
+      color: var(--link);
+      font-weight: 700;
+    }
+    main {
+      min-width: 0;
+      padding: 42px clamp(22px, 5vw, 72px) 72px;
+    }
+    article { max-width: 980px; }
+    .path {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      margin-bottom: 18px;
+      overflow-wrap: anywhere;
+    }
+    h1, h2, h3, h4 { line-height: 1.2; margin: 1.4em 0 0.45em; }
+    h1 { margin-top: 0; font-size: 34px; letter-spacing: 0; }
+    h2 { border-top: 1px solid var(--line); padding-top: 24px; font-size: 25px; }
+    h3 { font-size: 19px; }
+    p { margin: 0 0 14px; }
+    a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    ul, ol { padding-left: 26px; }
+    li { margin: 7px 0; }
+    pre {
+      overflow: auto;
+      border-radius: 8px;
+      background: var(--code);
+      padding: 16px;
+      border: 1px solid var(--line);
+    }
+    code {
+      border-radius: 5px;
+      background: var(--code);
+      padding: 2px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+    pre code { padding: 0; background: transparent; }
+    blockquote {
+      margin: 18px 0;
+      border-left: 4px solid var(--accent);
+      padding: 4px 0 4px 18px;
+      color: var(--muted);
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+    th, td { border: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }
+    th { background: var(--code); text-align: left; }
+    .error {
+      border: 1px solid #e3a3a3;
+      background: #fff1f1;
+      color: #7f1d1d;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    @media (max-width: 820px) {
+      .layout { display: block; }
+      aside {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      main { padding: 26px 18px 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <h1 class="brand">Egocentric Dataset Spec</h1>
+      <nav id="nav" aria-label="Markdown documents"></nav>
+    </aside>
+    <main>
+      <article>
+        <div class="path" id="path"></div>
+        <div id="content"></div>
+      </article>
+    </main>
+  </div>
+
+  <script>
+    const docs = [{"file": "README.md", "label": "Egocentric Visual Scanning Dataset Specification v0.1", "markdown": "# Egocentric Visual Scanning Dataset Specification v0.1\n\nThis specification defines the first version of the static egocentric visual scanning dataset. The\ndataset is designed to train visual models that predict future egocentric visual streams and infer\nthree-dimensional semantic spatial structure from visual history and known camera motion.\n\nVersion 1 has one core restriction:\n\n```text\nthe world is static; only the camera moves\n```\n\nThe dataset should therefore isolate visual-spatial learning from object manipulation, object\nmotion, and robotics contact dynamics.\n\n## Document Map\n\nRead the documents in this order:\n\n1. [Objective](objective.md)  \n   Defines the research purpose, model input, supervision, and claim boundary.\n\n2. [Static Scene Design](static_scene_design.md)  \n   Defines scenario families, scene variety, object/layout/material requirements, and static scene\n   acceptance checks.\n\n3. [Trajectory And Sequence Design](trajectory_sequence_design.md)  \n   Defines object-aware starts, free-space motion, smooth short clips, visual-content checks, local\n   continuity, and sequence-level spatial change.\n\n4. [Dataset Schema](dataset_schema.md)  \n   Defines the directory layout, scene metadata, episode metadata, frame fields, camera pose,\n   intrinsics, and required annotations.\n\n5. [Metrics And Acceptance](metrics_acceptance.md)  \n   Defines the four top-level dataset metrics and the concrete scene-level and sequence-level\n   acceptance functions.\n\n6. [Generation Pipeline](generation_pipeline.md)  \n   Defines the gated generation process from scenario sampling to final accepted clips.\n\n7. [Pilot Calibration](pilot_calibration.md)  \n   Defines how thresholds are calibrated before scaling.\n\n8. [Implementation Roadmap](implementation_roadmap.md)  \n   Maps the spec to the current toolchain and the next engineering tasks.\n\n## Conceptual Hierarchy\n\n```text\ndataset purpose\n  -> scenario families\n    -> many accepted static scenes per family\n      -> many object-aware starting viewpoints per static scene\n        -> many short smooth video clips per starting viewpoint\n          -> frame-level RGB/depth/segmentation/pose/intrinsics/correspondence\n```\n\n## Version 1 Target\n\nThe first production target is:\n\n```text\n3,500 accepted static scenes\n  desk: 1,000\n  kitchen counter: 1,000\n  bookshelf/storage: 500\n  living room table/sofa area: 500\n  bathroom vanity: 500\n```\n\nEach accepted static scene should then generate many short egocentric clips. The initial target for\nmajor scenario families is:\n\n```text\n1,000 scenes\n  x 128 starting viewpoints per scene\n  x 4 clips per starting viewpoint\n  x 32 frames per clip\n  = 16,384,000 frames per major family\n```\n\nThese numbers are starting targets. The actual thresholds and acceptance rates must be calibrated\nwith pilot batches before large-scale generation.\n\n## Current Claim Boundary\n\nThis spec does not claim real-robot transfer yet. It claims that a useful Version 1 dataset must\nproduce static, physically grounded, semantically meaningful indoor worlds and short egocentric\ncamera-motion clips that are valid, visually meaningful, smooth frame-to-frame, and spatially\ntransformative across the sequence.\n"}, {"file": "objective.md", "label": "Objective", "markdown": "# Objective\n\n## Purpose\n\nThe dataset trains models that learn visual-spatial dynamics from egocentric camera motion. The\nmodel observes a visual stream from a moving camera and uses known camera motion to predict future\nvisual observations or infer persistent three-dimensional semantic structure.\n\nThe first-stage problem is:\n\n```text\nstatic 3D indoor world + moving egocentric camera -> spatially grounded visual sequence\n```\n\nNo object manipulation, object motion, physical interaction, or task execution is required in\nVersion 1.\n\n## Generative Model\n\nEach static world is:\n\n```text\nz = (G, O, M, L)\n```\n\nwhere:\n\n- `G` is room geometry and layout;\n- `O` is object set, object geometry, and object pose;\n- `M` is material and texture assignment;\n- `L` is lighting.\n\nAt frame `t`, the camera pose is:\n\n```text\nT_t in SE(3)\n```\n\nThe rendered observation is:\n\n```text\nI_t = R(z, T_t)\n```\n\nThe world is static during one clip:\n\n```text\nz_t = z for all t\n```\n\nAll visual change should be caused by camera motion.\n\n## Learning Target\n\nThe main Version 1 training problem is:\n\n```text\n(I_0:k, delta_T_k:H-1) -> I_k+1:H\n```\n\nThat means the model receives past visual context and future spatial transformations, then predicts\nfuture visual frames.\n\nA richer spatial-learning target is:\n\n```text\nf(I_<=t, camera_poses, intrinsics) -> estimated 3D semantic scene representation\n```\n\nThe ground-truth world model is not model input. It is retained for supervision, filtering,\ndiagnosis, and evaluation.\n\n## Input And Supervision Separation\n\nModel input should stay close to sensory experience:\n\n- RGB;\n- optional depth;\n- camera pose or relative motion;\n- camera intrinsics.\n\nGround-truth supervision may include:\n\n- depth;\n- normals;\n- semantic segmentation;\n- instance segmentation;\n- pixel-to-3D correspondence;\n- visible object and surface identifiers;\n- scene and object metadata.\n\nThis separation keeps the learning problem meaningful while making the dataset auditable.\n\n## Four Dataset Requirements\n\nThe dataset fails if it fails any of the four top-level requirements:\n\n| Requirement | Meaning |\n|---|---|\n| generation speed | Accepted clips can be generated fast enough for repeated research loops. |\n| realism | Static scenes obey real-world geometry, scale, support, object-state, lighting, and navigability rules. |\n| per-scenario comprehensiveness | Clips cover required viewpoints, motions, objects, and visibility events inside each scenario. |\n| cross-scenario diversity | The full dataset covers scenario families, layouts, objects, appearances, states, and trajectory types. |\n\n## Claim Boundary\n\nVersion 1 is successful if it produces useful motion-conditioned visual transformations from static\nindoor worlds. It does not need manipulation or real-robot deployment evidence yet.\n"}, {"file": "static_scene_design.md", "label": "Static Scene Design", "markdown": "# Static Scene Design\n\n## Role In The Dataset\n\nThe static scene layer defines the world that camera trajectories move through. A static scene is a\nsemantically coherent 3D indoor environment with objects, support surfaces, materials, lighting, and\nvalid camera free space.\n\nOne accepted static scene should generate many short egocentric video clips.\n\n## Scene Representation\n\nOne static scene is:\n\n```text\nz = (layout, objects, geometry, materials, appearance, semantics, free_space)\n```\n\nThe scene must include:\n\n- room or local layout;\n- support surfaces;\n- large furniture or fixtures;\n- object instances;\n- object categories and instance ids;\n- object poses, scale, and support relations;\n- material, texture, and color assignments;\n- lighting profile;\n- valid camera free-space region.\n\n## Scenario Families\n\nVersion 1 begins with five scenario families.\n\n| Scenario family | Initial accepted scene target | Why it matters |\n|---|---:|---|\n| computer desk | 1,000 | Small objects, occlusion, planar surfaces, displays, cables, text-like patterns. |\n| kitchen counter | 1,000 | Counter-level scanning, dishware, appliances, reflective materials, structured functional zones. |\n| bookshelf/storage shelf | 500 | Repeated structures, vertical organization, partial occlusion, small parallax. |\n| living room table/sofa area | 500 | Local objects connected to room-scale context. |\n| bathroom vanity | 500 | Mirrors, bottles, sink/counter surfaces, compact free space, specular surfaces. |\n\nTotal initial target:\n\n```text\n3,500 accepted static scenes\n```\n\n## Computer Desk Requirements\n\nRequired content:\n\n- desk or table surface;\n- monitor or laptop;\n- input device such as keyboard, mouse, trackpad, or tablet;\n- personal or clutter objects such as mug, phone, notebook, pen, headphones, books, papers, cables,\n  lamp, charger, small electronics, or boxes;\n- background context such as wall, chair, shelf, window, or lamp.\n\nLayout variants:\n\n- single-monitor center desk;\n- laptop-centered desk;\n- dual-monitor desk;\n- L-shaped desk;\n- desk against wall;\n- desk near window;\n- desk with side shelf;\n- cluttered student desk;\n- minimal office desk.\n\n## Kitchen Counter Requirements\n\nRequired content:\n\n- countertop surface;\n- at least one functional zone: sink, stove, food-preparation area, or appliance area;\n- storage structures such as cabinet, drawer, shelf, or fridge;\n- dishware or appliance objects;\n- optional food, tools, towels, bottles, jars, pans, pots, cutting boards, utensils, and small\n  appliances.\n\nLayout variants:\n\n- straight counter;\n- L-shaped counter;\n- sink-centered counter;\n- stove-centered counter;\n- island counter;\n- small apartment kitchen;\n- dense appliance counter;\n- sparse counter.\n\n## Bookshelf Or Storage Shelf Requirements\n\nRequired content:\n\n- shelf structure;\n- repeated books or storage objects;\n- boxes, bins, decorative objects, plants, photo frames, small devices, or documents.\n\nThe scene may contain many repeated objects, but should vary size, color, thickness, orientation,\nand nearby distractors.\n\n## Living Room Table Or Sofa-Area Requirements\n\nRequired content:\n\n- sofa, chair, coffee table, side table, TV stand, shelf, or rug;\n- surface objects such as remote controls, cups, books, plants, toys, bags, pillows, blankets, and\n  decorative items;\n- background structures such as windows, doors, wall art, lamps, or curtains.\n\n## Bathroom Vanity Requirements\n\nRequired content:\n\n- sink and counter;\n- mirror or reflective surface;\n- cabinet, shelf, towel rack, or drawer;\n- bottles, toothbrushes, soap, towels, cosmetics, cups, tissue boxes, or containers.\n\n## Object Density\n\nEach scene samples a clutter level:\n\n```text\nsparse | medium | dense\n```\n\nInitial object count ranges:\n\n| Scenario | Sparse | Medium | Dense |\n|---|---:|---:|---:|\n| desk | 4-8 | 8-16 | 16-32 |\n| kitchen counter | 5-10 | 10-24 | 24-48 |\n| bookshelf/storage | 10-30 | 30-80 | 80-160 |\n\nOther scenario families should be calibrated during pilot generation.\n\n## Variation Axes\n\nEach scenario family must vary:\n\n- layout template;\n- object category set;\n- object count;\n- object instance identity;\n- object geometry and shape family;\n- object size;\n- object pose;\n- support relation;\n- material;\n- texture;\n- color;\n- roughness, metallicity, transparency, and reflectance;\n- static state;\n- lighting;\n- free-space geometry.\n\n## Static Object States\n\nObjects may have static states that do not change during a clip:\n\n- laptop open or closed;\n- book open or closed;\n- drawer or cabinet open or closed;\n- cup upright or physically plausible fallen;\n- chair pulled in or out;\n- towel folded or hanging;\n- sink empty or containing dishes;\n- monitor on, off, or displaying static content.\n\n## Static Scene Acceptance\n\nA static scene is accepted only if it passes:\n\n- semantic completeness;\n- physical plausibility;\n- visual richness from probe views;\n- free-space availability;\n- appearance diversity.\n\nThese checks happen before expensive trajectory rendering.\n"}, {"file": "trajectory_sequence_design.md", "label": "Trajectory And Sequence Design", "markdown": "# Trajectory And Sequence Design\n\n## Role In The Dataset\n\nEach accepted static scene should produce many short egocentric clips. A clip starts from a valid,\nmeaningful camera pose and follows a smooth physically plausible trajectory through free space.\n\nThe key tension is:\n\n```text\nadjacent frames should change smoothly\nbut the full clip should show meaningful spatial change\n```\n\n## Sequence Representation\n\nOne clip is:\n\n```text\ntau = [(I_0, T_0), (I_1, T_1), ..., (I_H, T_H)]\n```\n\nThe relative camera motion is:\n\n```text\ndelta_T_t = inverse(T_t) * T_t+1\n```\n\nVersion 1 clips are short:\n\n```text\nH = 32-64 frames for pilot clips\n```\n\nLonger scans may be used later, but the first production unit is many short useful motion\ntransformations, not a few long random videos.\n\n## Object-Aware Starting Viewpoints\n\nStarting poses must be valid and meaningful. The generator should not sample uniformly over empty\nspace.\n\nProcess:\n\n1. Select a semantic anchor, such as a monitor, keyboard, sink, counter workspace, shelf section, or\n   object cluster.\n2. Sample a camera center near the anchor but in free space.\n3. Orient the camera roughly toward the anchor.\n4. Add small angular perturbation so the anchor is not always centered.\n5. Reject the start if visual content is weak.\n\nThe selected anchor must be stored in sequence metadata.\n\n## Free-Space Constraints\n\nThe camera has clearance radius `r`; it is not a zero-volume point.\n\nEvery pose must satisfy:\n\n```text\ncamera_center(T_t) in free_space(r)\n```\n\nEvery swept transition must also be valid:\n\n```text\ncamera_center(interpolate(T_t, T_t+1, s)) in free_space(r), for all s in [0, 1]\n```\n\nThe rendered depth map should also satisfy a near-plane safety condition:\n\n```text\nminimum_valid_depth > d_min\n```\n\n## Motion Plausibility\n\nPilot motion ranges:\n\n| Quantity | Initial value |\n|---|---:|\n| per-frame translation | 1-5 cm |\n| per-frame rotation | 1-3 degrees |\n| clip length | 32-64 frames |\n\nThe trajectory should avoid:\n\n- teleportation;\n- jitter;\n- impossible acceleration;\n- abrupt orientation changes;\n- camera clipping through geometry;\n- near-plane collisions.\n\n## Motion Primitive Library\n\nDo not rely on purely random motion. Initial primitives:\n\n- lateral shift around anchor;\n- forward approach toward anchor;\n- backward retreat from anchor;\n- small orbit around object or object group;\n- look-down scan over surface;\n- look-up scan from surface to object;\n- left-right scan across multiple objects;\n- peek-around-occluder motion;\n- diagonal lean motion;\n- combined translation and yaw motion.\n\nA complete child-like inspection trajectory may combine:\n\n```text\noverview -> approach -> pan/tilt -> lateral shift -> orbit -> retreat -> revisit\n```\n\n## Visual Content Checks\n\nEach frame should contain meaningful visual content.\n\nPer-frame checks:\n\n- foreground ratio;\n- minimum visible object count;\n- maximum single-object area ratio;\n- semantic entropy;\n- anchor visibility.\n\nPilot thresholds:\n\n| Requirement | Pilot value |\n|---|---:|\n| foreground ratio | 0.4 |\n| minimum visible objects | 2 or 3 |\n| maximum single-object area | 0.7 |\n| anchor visibility ratio | 0.5 |\n\nThresholds must be calibrated per scenario family.\n\n## Continuity And Change\n\nLocal continuity:\n\n- adjacent visual change should be moderate;\n- adjacent pose change should be bounded;\n- acceleration should be smooth.\n\nGlobal sequence change:\n\n- final pose should differ from initial pose;\n- final visual frame should differ from initial frame;\n- the clip should not be solvable by copy-forward.\n\nAccepted clips should satisfy:\n\n```text\nmoderate local change at each step\nsignificant accumulated change over the sequence\n```\n\n## Sequence Acceptance Function\n\nA sequence is accepted only if:\n\n```text\nA(tau) =\n  C_occ\n  and C_phys\n  and C_fg\n  and C_obj\n  and C_balance\n  and C_div\n  and C_anchor\n  and C_cont\n  and C_change\n```\n\nwhere:\n\n- `C_occ` checks occupancy and swept-path validity;\n- `C_phys` checks plausible camera motion;\n- `C_fg` checks foreground content;\n- `C_obj` checks visible object count;\n- `C_balance` checks object-area balance;\n- `C_div` checks semantic diversity;\n- `C_anchor` checks anchor visibility;\n- `C_cont` checks local continuity;\n- `C_change` checks sequence-level spatial and visual change.\n"}, {"file": "dataset_schema.md", "label": "Dataset Schema", "markdown": "# Dataset Schema\n\n## Dataset Layout\n\nThe dataset unit is a sequence episode generated from one accepted static scene.\n\nRecommended conceptual layout:\n\n```text\ndataset_root/\n  metadata/\n    dataset_manifest.jsonl\n    scene_manifest.jsonl\n    episode_manifest.jsonl\n    object_taxonomy.json\n    action_space.json\n  scenes/\n    scene_000001/\n      scene.json\n      world.json\n      object_metadata.json\n      validation.json\n  episodes/\n    episode_000000001/\n      episode.json\n      trajectory.parquet\n      camera_intrinsics.json\n      frames/\n        000000.rgb.webp\n        000000.depth.png\n        000000.semantic.png\n        000000.instance.png\n        000000.normal.exr\n        000000.point3d.exr\n        000000.visible_surface_ids.npy\n        000000.visible_object_ids.json\n  splits/\n    train.txt\n    val_seen_category.txt\n    test_scene_held_out.txt\n    test_object_held_out.txt\n    test_layout_held_out.txt\n    test_trajectory_held_out.txt\n```\n\nThe exact file formats may change for storage efficiency, but the information must be preserved.\n\n## Minimal Frame Fields\n\nVersion 1 mandatory frame fields:\n\n- RGB;\n- depth;\n- camera pose;\n- camera intrinsics;\n- frame index or timestamp;\n- semantic segmentation;\n- instance segmentation;\n- visible object identifiers.\n\nPreferred full frame fields:\n\n- RGB;\n- depth;\n- surface normals;\n- semantic segmentation;\n- instance segmentation;\n- pixel-to-3D correspondence map;\n- visible surface ids;\n- visible object ids;\n- optional optical flow to adjacent frames.\n\n## Camera Pose\n\nCanonical pose should use metric position and quaternion orientation:\n\n```json\n{\n  \"frame_id\": 0,\n  \"timestamp\": 0.0,\n  \"position_m\": [0.0, 1.2, 2.4],\n  \"orientation_quaternion_xyzw\": [0.0, 0.0, 0.0, 1.0],\n  \"yaw_pitch_roll_degrees\": [0.0, 0.0, 0.0],\n  \"fov_degrees\": 60.0\n}\n```\n\nYaw, pitch, and roll are for debugging. Quaternion orientation is canonical.\n\n## Camera Intrinsics\n\nEvery sequence must store camera intrinsics:\n\n```json\n{\n  \"width\": 768,\n  \"height\": 768,\n  \"fx\": 665.1,\n  \"fy\": 665.1,\n  \"cx\": 384.0,\n  \"cy\": 384.0,\n  \"fov_degrees\": 60.0,\n  \"near_clip_m\": 0.05,\n  \"far_clip_m\": 20.0\n}\n```\n\nThe intrinsic matrix is:\n\n```text\nK = [[fx, 0, cx],\n     [0, fy, cy],\n     [0, 0, 1]]\n```\n\n## Static Scene Metadata\n\nScene metadata must include:\n\n- scene id;\n- scenario family;\n- layout template;\n- clutter level;\n- room bounds;\n- support surfaces;\n- free-space summary;\n- lighting profile;\n- accepted/rejected state;\n- scene validation scores.\n\nObject metadata must include:\n\n- object id;\n- category;\n- mesh id;\n- shape family;\n- position;\n- orientation;\n- scale;\n- support relation;\n- material;\n- base color;\n- texture id;\n- roughness;\n- metallic;\n- static state.\n\n## Sequence Metadata\n\nEach episode must store:\n\n- scenario id;\n- sequence id;\n- static scene id;\n- selected semantic anchor;\n- camera poses;\n- relative motions;\n- camera intrinsics;\n- action or primitive sequence;\n- quality scores;\n- acceptance/rejection reasons;\n- paths to frame annotations.\n\nThe core model input is:\n\n```text\n(I_0:k, delta_T_k:H-1)\n```\n\nThe target is:\n\n```text\nI_k+1:H\n```\n"}, {"file": "metrics_acceptance.md", "label": "Metrics And Acceptance", "markdown": "# Metrics And Acceptance\n\n## Top-Level Dataset Metrics\n\nThe dataset is judged by four top-level metrics:\n\n| Metric | What it measures |\n|---|---|\n| generation speed | Accepted frames per second and stage timing. |\n| realism | Physical, geometric, semantic, and visual plausibility. |\n| per-scenario comprehensiveness | Whether each scenario and sequence covers required content and viewpoints. |\n| cross-scenario diversity | Whether the dataset covers scenario families, layouts, objects, appearances, states, and trajectory types. |\n\n## Static Scene Acceptance\n\nA static scene must pass:\n\n```text\nC_scene(z) =\n  C_semantic_complete\n  and C_physical\n  and C_visual_rich\n  and C_free_space\n  and C_appearance_diverse\n```\n\n### Semantic Completeness\n\nThe scene must contain all required categories for its scenario family.\n\nExamples:\n\n- desk: desk or table, display, input device;\n- kitchen: counter, storage, dishware or appliance;\n- bookshelf: shelf and repeated shelf objects.\n\n### Physical Plausibility\n\nReject if:\n\n- objects float;\n- objects interpenetrate severely;\n- support relations are invalid;\n- scale is implausible;\n- camera-valid free space is empty.\n\n### Visual Richness\n\nRender low-resolution probe views and compute whether meaningful content is visible. A static scene\nwith valid geometry but no useful viewpoints should be rejected before trajectory generation.\n\n### Free-Space Availability\n\nThe scene must have enough camera-valid free space for object-aware starts and short smooth\ntrajectories.\n\n### Appearance Diversity\n\nThe scene should vary materials, colors, and textures enough to avoid one-note visual content.\n\n## Sequence Acceptance\n\nA video sequence must pass:\n\n```text\nA(tau) =\n  C_occ\n  and C_phys\n  and C_fg\n  and C_obj\n  and C_balance\n  and C_div\n  and C_anchor\n  and C_cont\n  and C_change\n```\n\n### Occupancy Validity\n\n- every camera center is in free space;\n- swept path between adjacent poses stays in free space;\n- near-plane depth is above the minimum safety threshold.\n\n### Physical Plausibility\n\n- per-frame translation is bounded;\n- per-frame rotation is bounded;\n- acceleration and angular acceleration are smooth;\n- no teleportation or jitter.\n\n### Visual Content\n\nPer-frame visual-content metrics:\n\n- foreground ratio;\n- visible object count;\n- maximum single-object area ratio;\n- semantic entropy;\n- anchor visibility.\n\nPilot thresholds:\n\n| Metric | Initial value |\n|---|---:|\n| foreground ratio | 0.4 |\n| visible objects | 2 or 3 |\n| max single-object area | 0.7 |\n| anchor visibility ratio | 0.5 |\n\n### Local Continuity\n\nAdjacent frames should have moderate visual change:\n\n```text\nd_min_local <= visual_delta(I_t, I_t+1) <= d_max_local\n```\n\nAdjacent pose changes should also be bounded.\n\n### Global Spatial Change\n\nThe final pose and visual frame should differ meaningfully from the initial pose and frame:\n\n```text\npose_delta(T_0, T_H) >= Gamma_T\nvisual_delta(I_0, I_H) >= Gamma_I\n```\n\nThis prevents copy-forward clips.\n\n## Coverage Metrics\n\nSequence and scene coverage should eventually include:\n\n- percentage of object instances observed at least once;\n- percentage of visible surface area observed at least once;\n- average number of views per observed surface point;\n- viewing angle distribution per surface;\n- viewing distance distribution per surface;\n- occlusion reveal count;\n- revisit count;\n- close-up coverage ratio;\n- global overview coverage ratio.\n\nThe first implementation may approximate these with visible object timelines, pose coverage, and\nimage-space metrics. The preferred implementation should use pixel-to-3D correspondence and surface\nids.\n"}, {"file": "generation_pipeline.md", "label": "Generation Pipeline", "markdown": "# Generation Pipeline\n\n## Overview\n\nGeneration is a gated process. The system should reject bad static scenes before rendering expensive\nclips and reject bad candidate trajectories before final-resolution rendering.\n\n## Static Scene Pipeline\n\n1. Sample scenario family.\n2. Sample layout template.\n3. Sample clutter level.\n4. Sample required object categories.\n5. Sample optional and distractor categories.\n6. Sample object mesh or procedural geometry.\n7. Sample object scale, shape variant, and pose.\n8. Place large furniture and support structures.\n9. Place required objects.\n10. Place optional objects.\n11. Place clutter objects.\n12. Resolve collisions and support constraints.\n13. Assign material, texture, color, and surface properties.\n14. Assign static object states.\n15. Generate occupancy field.\n16. Generate free-space field.\n17. Render low-resolution probe views.\n18. Score semantic completeness, physical plausibility, visual richness, free-space, and appearance\n    diversity.\n19. Accept or reject static scene.\n20. Pass accepted scene to trajectory generation.\n\n## Trajectory Pipeline\n\n1. Select accepted static scene.\n2. Build or load occupancy and free-space representation.\n3. Select semantic anchor.\n4. Sample valid object-aware starting pose.\n5. Sample a smooth motion primitive or primitive composition.\n6. Check free-space poses and swept path.\n7. Render cheap validation preview.\n8. Compute visual-content metrics.\n9. Compute local continuity metrics.\n10. Compute global sequence-change metrics.\n11. Accept or reject candidate sequence.\n12. Final-render accepted sequence.\n13. Store frames, pose, intrinsics, annotations, metadata, and quality scores.\n\n## Two-Stage Rendering\n\nUse cheap validation renders before final rendering:\n\n```text\ncandidate scene/trajectory\n  -> low-resolution validation render\n  -> acceptance scores\n  -> final-resolution render only if accepted\n```\n\nThis prevents final rendering from being dominated by invalid, empty, or redundant clips.\n\n## Remote Execution Rule\n\nAll dataset generation, simulator tests, and preview generation should run on the remote RTX 5090\nserver. Local runs are for source editing and static checks only.\n\nDefault GPU reservation:\n\n```text\nCUDA_VISIBLE_DEVICES=4,5,6,7\n```\n\n## Scale Ladder\n\nUse this ladder:\n\n```text\nremote schema smoke: 3-10 episodes\nreal simulator smoke: 1-5 episodes\nmicro scene/trajectory pilot: 100-1,000 clips\nscenario pilot: 100-500 candidate static scenes\naccepted scene pilot: 1,000 scenes\nfirst production target: 3,500 accepted scenes\ninitial research scale: 10M+ frames\n```\n\nDo not scale until the current level passes acceptance metrics and visual inspection.\n"}, {"file": "pilot_calibration.md", "label": "Pilot Calibration", "markdown": "# Pilot Calibration\n\n## Purpose\n\nThresholds should not be chosen only from theory. Each scenario family needs empirical calibration\nbecause desks, kitchens, bookshelves, living rooms, and bathrooms have different visual statistics.\n\n## Static Scene Calibration\n\nFor each scenario family:\n\n1. Generate 100-500 candidate static scenes.\n2. Render 10-20 low-resolution probe views per scene.\n3. Compute static scene metrics:\n   - semantic completeness;\n   - physical plausibility;\n   - visual richness;\n   - free-space availability;\n   - appearance diversity;\n   - object count and category entropy.\n4. Inspect accepted and rejected examples.\n5. Tune thresholds.\n6. Generate 1,000 accepted scenes.\n7. Pass accepted scenes to trajectory generation.\n\n## Trajectory Calibration\n\nFor one scenario family, such as desks:\n\n```text\n100 scenes\n  x 32 starting views\n  x 4 candidate clips\n```\n\nFor each candidate clip, compute:\n\n- foreground ratio;\n- visible object count;\n- maximum single-object area ratio;\n- semantic entropy;\n- anchor visibility ratio;\n- adjacent visual delta;\n- first-to-last visual delta;\n- adjacent pose delta;\n- first-to-last pose delta;\n- action or primitive distribution;\n- rejection reason.\n\nInspect accepted and rejected clips until three qualitative conditions hold:\n\n1. the camera never violates obvious physical constraints;\n2. the visual stream remains smooth and human-like;\n3. the clip contains meaningful objects and meaningful spatial change.\n\n## Pilot Threshold Starting Points\n\n| Requirement | Initial value |\n|---|---:|\n| foreground ratio | 0.4 |\n| minimum visible objects | 2 or 3 |\n| maximum single-object area | 0.7 |\n| anchor visibility ratio | 0.5 |\n| clip length | 32-64 frames |\n| per-frame translation | 1-5 cm |\n| per-frame rotation | 1-3 degrees |\n\nThese are not final. Freeze thresholds only after pilot visual inspection and rejection analysis.\n\n## Calibration Outputs\n\nEach calibration run should produce:\n\n- run report;\n- accepted and rejected clip preview dashboard;\n- threshold table by scenario family;\n- rejection reason histogram;\n- examples of true accept, true reject, and uncertain cases;\n- decision: scale, revise static scene generator, revise trajectory policy, or revise thresholds.\n"}, {"file": "implementation_roadmap.md", "label": "Implementation Roadmap", "markdown": "# Implementation Roadmap\n\n## Current State\n\nThe current toolchain can:\n\n- run remotely on the RTX 5090 server;\n- generate mock episodes;\n- run AI2-THOR CloudRendering;\n- load ProcTHOR-10K through `prior`;\n- render RGB, depth, semantic segmentation, instance segmentation, pose, action, and visible objects;\n- write manifests and episode folders;\n- compute initial four metric payloads;\n- generate a static HTML preview with contact sheets and frame metadata.\n\nCurrent limitation:\n\n- trajectories are still weak and not object-aware;\n- static scene acceptance is not yet implemented;\n- camera intrinsics and quaternion pose are not fully stored;\n- normals, point3D maps, and surface ids are not exported;\n- visual-content metrics are only approximate;\n- ProcTHOR scene selection does not yet target scenario families such as desk or kitchen.\n\n## Next Engineering Tasks\n\n### 1. Schema Upgrade\n\nAdd:\n\n- camera intrinsics file;\n- quaternion orientation;\n- relative motion `delta_T`;\n- selected anchor metadata;\n- static scene validation metadata;\n- sequence acceptance metadata.\n\n### 2. Visual-Content Metrics\n\nImplement:\n\n- visible object count;\n- foreground ratio from semantic segmentation;\n- maximum single-object area from instance segmentation;\n- semantic entropy;\n- first-to-last image delta;\n- adjacent image delta;\n- pose continuity;\n- first-to-last pose change.\n\n### 3. Object-Aware Starts\n\nUse AI2-THOR/ProcTHOR metadata to:\n\n- find visible semantic anchors;\n- sample or choose reachable camera poses near anchors;\n- orient camera toward anchor;\n- reject starts with weak visual content.\n\n### 4. Smooth Motion Primitive Library\n\nImplement primitive policies:\n\n- lateral shift;\n- approach;\n- retreat;\n- small orbit;\n- look-down scan;\n- look-up scan;\n- left-right scan;\n- diagonal lean;\n- combined translation and yaw.\n\n### 5. Static Scene Acceptance Layer\n\nImplement static scene probe views and scores:\n\n- semantic completeness;\n- physical plausibility;\n- visual richness;\n- free-space availability;\n- appearance diversity.\n\nFor current ProcTHOR integration, start with metadata and probe-view approximations, then improve\nwith explicit occupancy/free-space geometry.\n\n### 6. Viewer Upgrade\n\nExtend `egodata preview` to show:\n\n- accepted and rejected examples;\n- rejection reasons;\n- visual-content metrics per frame;\n- pose path;\n- action or primitive timeline;\n- anchor visibility timeline;\n- frame-to-frame visual delta;\n- first-to-last visual delta.\n\n### 7. Scenario Configs\n\nAdd scenario-family config files:\n\n- `computer_desk.yaml`;\n- `kitchen_counter.yaml`;\n- `bookshelf_storage.yaml`;\n- `living_room_table.yaml`;\n- `bathroom_vanity.yaml`.\n\nEach file should encode required categories, optional categories, clutter levels, layout variants,\nstatic states, visual-content foreground classes, and pilot thresholds.\n\n## Immediate Next Run\n\nThe next useful remote run should not be larger. It should be more diagnostic:\n\n```text\nProcTHOR object-aware start pilot\n  5-10 procedural scenes\n  8-16 candidate starts per scene\n  1-2 short clips per start\n  32 frames per clip\n  preview accepted and rejected clips\n```\n\nSuccess means:\n\n- starts look at meaningful objects or surfaces;\n- clips satisfy local continuity and global change;\n- rejection reasons are useful;\n- preview makes failures obvious.\n"}];
+    const entryFile = "README.md";
+    const nav = document.querySelector("#nav");
+    const content = document.querySelector("#content");
+    const pathLabel = document.querySelector("#path");
+    const byFile = new Map(docs.map((doc) => [doc.file, doc]));
+    const byBase = new Map(docs.map((doc) => [doc.file.split("/").pop(), doc]));
+
+    for (const doc of docs) {
+      const link = document.createElement("a");
+      link.href = `#${encodeURIComponent(doc.file)}`;
+      link.textContent = doc.label;
+      link.dataset.file = doc.file;
+      nav.appendChild(link);
+    }
+
+    window.addEventListener("hashchange", () => loadDoc(currentFile()));
+
+    function currentFile() {
+      const raw = decodeURIComponent(location.hash.replace(/^#/, "")) || entryFile;
+      return byFile.has(raw) ? raw : entryFile;
+    }
+
+    function loadDoc(file) {
+      const doc = byFile.get(file);
+      setActive(file);
+      pathLabel.textContent = file;
+      if (!doc) {
+        content.innerHTML = `<div class="error">Could not load <code>${escapeHtml(file)}</code>.</div>`;
+        return;
+      }
+      content.innerHTML = renderMarkdown(doc.markdown);
+      wireInternalLinks();
+      window.scrollTo({ top: 0 });
+    }
+
+    function setActive(file) {
+      for (const link of nav.querySelectorAll("a")) {
+        link.classList.toggle("active", link.dataset.file === file);
+      }
+    }
+
+    function wireInternalLinks() {
+      for (const link of content.querySelectorAll("a[href]")) {
+        const href = link.getAttribute("href");
+        const clean = href.replace(/^<|>$/g, "");
+        if (!clean.endsWith(".md") && !clean.includes(".md#")) continue;
+        const pathPart = clean.split("#", 1)[0].split("/").pop();
+        const target = byBase.get(pathPart);
+        if (target) {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            location.hash = encodeURIComponent(target.file);
+          });
+        }
+      }
+    }
+
+    function renderMarkdown(markdown) {
+      const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+      const html = [];
+      let paragraph = [];
+      let listType = null;
+      let inFence = false;
+      let fence = [];
+      let table = [];
+      let inQuote = false;
+      let quote = [];
+
+      function flushParagraph() {
+        if (paragraph.length) {
+          html.push(`<p>${inline(paragraph.join(" "))}</p>`);
+          paragraph = [];
+        }
+      }
+      function flushList() {
+        if (listType) {
+          html.push(`</${listType}>`);
+          listType = null;
+        }
+      }
+      function flushTable() {
+        if (table.length) {
+          html.push(renderTable(table));
+          table = [];
+        }
+      }
+      function flushQuote() {
+        if (inQuote) {
+          html.push(`<blockquote>${quote.map((line) => `<p>${inline(line)}</p>`).join("")}</blockquote>`);
+          inQuote = false;
+          quote = [];
+        }
+      }
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("```")) {
+          flushParagraph(); flushList(); flushTable(); flushQuote();
+          if (inFence) {
+            html.push(`<pre><code>${escapeHtml(fence.join("\n"))}</code></pre>`);
+            fence = [];
+            inFence = false;
+          } else {
+            inFence = true;
+          }
+          continue;
+        }
+        if (inFence) {
+          fence.push(line);
+          continue;
+        }
+        if (!trimmed) {
+          flushParagraph(); flushList(); flushTable(); flushQuote();
+          continue;
+        }
+        if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+          flushParagraph(); flushList(); flushQuote();
+          table.push(trimmed);
+          continue;
+        }
+        flushTable();
+        if (trimmed.startsWith(">")) {
+          flushParagraph(); flushList();
+          inQuote = true;
+          quote.push(trimmed.replace(/^>\s?/, ""));
+          continue;
+        }
+        flushQuote();
+
+        const heading = /^(#{1,4})\s+(.+)$/.exec(trimmed);
+        if (heading) {
+          flushParagraph(); flushList();
+          const level = heading[1].length;
+          html.push(`<h${level}>${inline(heading[2])}</h${level}>`);
+          continue;
+        }
+        const ordered = /^(\d+)\.\s+(.+)$/.exec(trimmed);
+        if (ordered) {
+          flushParagraph();
+          if (listType !== "ol") {
+            flushList();
+            html.push("<ol>");
+            listType = "ol";
+          }
+          html.push(`<li>${inline(ordered[2])}</li>`);
+          continue;
+        }
+        const unordered = /^[-*]\s+(.+)$/.exec(trimmed);
+        if (unordered) {
+          flushParagraph();
+          if (listType !== "ul") {
+            flushList();
+            html.push("<ul>");
+            listType = "ul";
+          }
+          html.push(`<li>${inline(unordered[1])}</li>`);
+          continue;
+        }
+        paragraph.push(trimmed);
+      }
+
+      flushParagraph(); flushList(); flushTable(); flushQuote();
+      return html.join("\n");
+    }
+
+    function renderTable(rows) {
+      const filtered = rows.filter((row) => !/^\|\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|$/.test(row));
+      if (!filtered.length) return "";
+      const cells = filtered.map((row) => row.slice(1, -1).split("|").map((cell) => inline(cell.trim())));
+      const head = cells[0].map((cell) => `<th>${cell}</th>`).join("");
+      const body = cells.slice(1).map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("");
+      return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    }
+
+    function inline(text) {
+      let safe = escapeHtml(text);
+      safe = safe.replace(/`([^`]+)`/g, "<code>$1</code>");
+      safe = safe.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => {
+        const cleanHref = href.replace(/^&lt;|&gt;$/g, "");
+        return `<a href="${escapeAttribute(cleanHref)}">${label}</a>`;
+      });
+      return safe;
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+    function escapeAttribute(value) {
+      return escapeHtml(value).replaceAll("'", "&#39;");
+    }
+
+    loadDoc(currentFile());
+  </script>
+</body>
+</html>

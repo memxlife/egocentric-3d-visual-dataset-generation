@@ -1,0 +1,40 @@
+id: procthor_house_smoke
+name: ProcTHOR House Smoke
+description: Permissive real-simulator card for loading and rendering procedural ProcTHOR houses.
+
+speed:
+  min_raw_frames_per_second: 0.5
+
+realism:
+  min_score: 1.0
+  required_object_groups: []
+  hard_checks:
+    - name: procthor_house_loaded
+      mock_assume_passed: true
+    - name: ai2thor_cloud_rendering
+      mock_assume_passed: true
+
+coverage:
+  min_score: 0.5
+  required_actions: [MoveAhead, RotateRight, LookDown]
+  required_visibility_events:
+    require_disappear_reappear: false
+  viewpoint_bins:
+    _min_unique_bins: 2
+    yaw:
+      width: 45
+    pitch:
+      edges: [-1, 1]
+      labels: [down, level, up]
+  weights:
+    view: 0.40
+    motion: 0.35
+    visibility: 0.10
+    object: 0.15
+
+diversity:
+  min_episode_score: 1.0
+  required_episode_axes:
+    - scenario_card_id
+    - policy
+    - trajectory_length

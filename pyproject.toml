@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "egocentric-dataset-toolchain"
+version = "0.1.0"
+description = "Seed-driven toolchain for egocentric embodied synthetic dataset generation."
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "pillow>=10.0",
+  "pyarrow>=14.0",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+ai2thor = [
+  "ai2thor>=5.0",
+  "prior>=1.0",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+
+[project.scripts]
+egodata = "egodataset.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

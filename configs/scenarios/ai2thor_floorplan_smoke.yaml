@@ -1,0 +1,43 @@
+id: ai2thor_floorplan_smoke
+name: AI2-THOR FloorPlan Smoke
+description: Real simulator smoke card for built-in AI2-THOR kitchen scenes.
+
+speed:
+  min_raw_frames_per_second: 1
+
+realism:
+  min_score: 0.75
+  required_object_groups:
+    - name: kitchen_or_room_objects
+      any_of: [Cabinet, CounterTop, Fridge, Sink, StoveBurner, Microwave, Mug, Plate, Bowl]
+  hard_checks:
+    - name: ai2thor_physics_scene
+      mock_assume_passed: true
+    - name: built_in_scene_semantics
+      mock_assume_passed: true
+
+coverage:
+  min_score: 0.55
+  required_actions: [MoveAhead, RotateRight, LookDown]
+  required_visibility_events:
+    require_disappear_reappear: false
+  viewpoint_bins:
+    _min_unique_bins: 2
+    yaw:
+      width: 45
+    pitch:
+      edges: [-1, 1]
+      labels: [down, level, up]
+  weights:
+    view: 0.35
+    motion: 0.25
+    visibility: 0.25
+    object: 0.15
+
+diversity:
+  min_episode_score: 1.0
+  required_episode_axes:
+    - scenario_card_id
+    - policy
+    - visible_categories
+    - trajectory_length

@@ -1,0 +1,56 @@
+id: desk_active_scan
+name: Desk Active Scan
+description: Strict phase-one desk scenario card for ProcTHOR or another real simulator backend.
+
+speed:
+  min_raw_frames_per_second: 20
+
+realism:
+  min_score: 0.85
+  required_object_groups:
+    - name: support_surface
+      any_of: [desk, table]
+    - name: display
+      any_of: [monitor, laptop]
+    - name: input
+      any_of: [keyboard, mouse]
+    - name: clutter
+      any_of: [mug, phone, notebook, book, pen, cable, lamp, headphones, box]
+  hard_checks:
+    - name: scale_validity
+    - name: support_relation_validity
+    - name: collision_validity
+    - name: semantic_relation_validity
+    - name: navigability
+
+coverage:
+  min_score: 0.75
+  required_actions: [MoveAhead, LookDown, RotateLeft, RotateRight, MoveLeft, MoveRight]
+  required_visibility_events:
+    require_disappear_reappear: true
+  viewpoint_bins:
+    _min_unique_bins: 6
+    horizontal:
+      edges: [-0.3, 0.3]
+      labels: [left, center, right]
+    distance:
+      edges: [-0.5, 0.5]
+      labels: [near, middle, far]
+    pitch:
+      edges: [-5, 5]
+      labels: [down, level, up]
+    yaw:
+      width: 45
+  weights:
+    view: 0.35
+    motion: 0.25
+    visibility: 0.25
+    object: 0.15
+
+diversity:
+  min_episode_score: 1.0
+  required_episode_axes:
+    - scenario_card_id
+    - policy
+    - visible_categories
+    - trajectory_length
