@@ -17,6 +17,10 @@ The purpose of this specification is not only to describe what files are written
 generation constraints, visual-content requirements, trajectory mechanics, acceptance metrics,
 calibration procedure, and claim boundary needed to produce a useful research dataset.
 
+Every quantitative setting in this specification must state why that value is used and what failure
+appears if the value is too low or too high. A number without justification is only a placeholder,
+not an accepted dataset requirement.
+
 ## Phase 1 Prototype And Version 1 Dataset
 
 The project has two scopes that must not be confused.
@@ -47,28 +51,32 @@ Read the specification documents in this order:
    Defines scenario grammar, layout templates, object categories, support rules, object states,
    material distributions, clutter regimes, and rejected examples.
 
-4. [Visual Content Requirements](visual_content_requirements.md)  
+4. [Quantitative Requirements](quantitative_requirements.md)  
+   Defines the default numeric contract for scene probes, frame gates, clip gates, visual delta,
+   dataset coverage, throughput, and pilot calibration.
+
+5. [Visual Content Requirements](visual_content_requirements.md)  
    Defines frame-level, clip-level, and dataset-level visual-content requirements.
 
-5. [Trajectory And Sequence Design](trajectory_sequence_design.md)  
+6. [Trajectory And Sequence Design](trajectory_sequence_design.md)  
    Defines object-aware start sampling, free-space construction, motion primitives, smoothness
    constraints, and spatial-change requirements.
 
-6. [Metrics And Acceptance](metrics_acceptance.md)  
+7. [Metrics And Acceptance](metrics_acceptance.md)  
    Defines executable scene, frame, clip, and dataset metrics with inputs, formulas, thresholds,
    debug artifacts, and rejection reason codes.
 
-7. [Dataset Schema](dataset_schema.md)  
+8. [Dataset Schema](dataset_schema.md)  
    Defines directory layout, coordinate conventions, depth encoding, segmentation IDs, metadata,
    and seed/version policy.
 
-8. [Splits And Generalization](splits_and_generalization.md)  
+9. [Splits And Generalization](splits_and_generalization.md)  
    Defines train/validation/test split policies and the generalization claims each split supports.
 
-9. [Generation Pipeline](generation_pipeline.md)  
+10. [Generation Pipeline](generation_pipeline.md)  
    Defines the abstract gated generation process from scenario sampling to post-write validation.
 
-10. [Pilot Calibration](pilot_calibration.md)  
+11. [Pilot Calibration](pilot_calibration.md)  
     Defines how thresholds are calibrated before scaling.
 
 Implementation status and machine-specific commands live outside the specification:

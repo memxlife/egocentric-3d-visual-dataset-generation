@@ -13,7 +13,8 @@ primitive library, and metric thresholds actually accept good clips and reject b
 For each scenario family:
 
 1. Generate 100-500 candidate static scenes.
-2. Render 10-20 low-resolution probe views per scene.
+2. Render 12 low-resolution probe views per scene for desk, kitchen, living room, and bathroom;
+   render 16 probe views for bookshelf/storage.
 3. Compute static scene metrics:
    - semantic completeness;
    - support validity;
@@ -63,13 +64,20 @@ Inspect accepted and rejected clips until three qualitative conditions hold:
 
 | Requirement | Initial value |
 |---|---:|
-| foreground ratio | 0.4 |
-| minimum visible objects | 2 or 3 |
-| maximum single-object area | 0.7 |
-| anchor visibility ratio | 0.5 |
-| clip length | 32-64 frames |
+| foreground ratio | 0.40 desk/kitchen/bath, 0.55 bookshelf, 0.30 living |
+| minimum visible objects | 2 sparse, 3 medium/dense, 5 bookshelf |
+| maximum single-object area | 0.70 |
+| anchor area ratio | 0.03-0.55 default, 0.02-0.60 living/bookshelf |
+| anchor visible frame fraction | 0.70 for anchor-maintaining primitives |
+| clip length | 32 frames pilot, 32-64 allowed |
 | per-frame translation | 1-5 cm |
 | per-frame rotation | 1-3 degrees |
+| max linear acceleration | 0.03 m/frame^2 |
+| max angular acceleration | 2 deg/frame^2 |
+| first-to-last visual delta | >= 0.12 pass, 0.08-0.12 review |
+| adjacent visual delta | 0.015-0.18 pass |
+| total displacement | >= 0.12 m for translation primitives |
+| accumulated yaw/pitch | >= 10 degrees for scan primitives |
 
 These are not final. Freeze thresholds only after pilot visual inspection and rejection analysis.
 
@@ -105,3 +113,18 @@ Each pilot ends with one of these decisions:
 
 Do not scale on aggregate acceptance rate alone. The visual examples and rejection reasons must
 explain why the accepted data is useful.
+
+## Quantitative Scale Decision
+
+Scale up only if all of these are true:
+
+| Gate | Pass condition |
+|---|---|
+| static scene acceptance rate | between `10%` and `70%` for early pilots, unless a documented reason explains otherwise |
+| clip acceptance rate after scene acceptance | `>= 20%` for Phase 1, `>= 35%` for Version 1 planning |
+| rejected candidates with reason codes | `>= 95%` Phase 1, `>= 99%` Version 1 |
+| false accept rate in reviewed sample | `<= 10%` |
+| false reject rate in reviewed sample | `<= 15%` |
+| post-write invalid-file rate | `0` |
+| accepted examples inspected | at least `20` per scenario family before scaling |
+| rejected examples inspected | at least `20` per scenario family before scaling |

@@ -32,10 +32,10 @@ C_scene(z) =
 |---|---|---|---|---|---|
 | `semantic_completeness` | Ensure required scenario grammar is present. | Object metadata, scenario card. | Required structures and categories are present. | all required items present | `missing_required_content` |
 | `support_validity` | Reject floating, embedded, or nonsensical objects. | Object poses, support surfaces, collision checks. | All required support relations valid and interpenetration below tolerance. | true | `invalid_support_relation` |
-| `probe_foreground_ratio` | Reject scenes with no useful viewpoints. | Probe semantic masks. | Median foreground ratio over probe views. | scenario threshold | `low_probe_foreground` |
-| `probe_visible_object_count` | Ensure probe views show meaningful entities. | Probe instance masks/object ids. | Median visible object count. | >= 2 or 3 | `low_probe_object_count` |
-| `free_space_volume` | Ensure camera can move. | Occupancy/free-space field. | Valid camera-center samples or connected volume. | scenario threshold | `insufficient_free_space` |
-| `appearance_entropy` | Avoid one-note materials/colors. | Material and color metadata. | Category/material/color entropy or unique bins. | pilot calibrated | `low_appearance_diversity` |
+| `probe_foreground_ratio` | Reject scenes with no useful viewpoints. | Probe semantic masks. | Median foreground ratio over probe views. | `>= 0.40` desk/kitchen/bath, `>= 0.55` bookshelf, `>= 0.30` living | `low_probe_foreground` |
+| `probe_visible_object_count` | Ensure probe views show meaningful entities. | Probe instance masks/object ids. | Median visible object count. | `>= 3` desk/kitchen/bath/living, `>= 6` bookshelf | `low_probe_object_count` |
+| `free_space_volume` | Ensure camera can move. | Occupancy/free-space field. | Connected component supports valid start samples. | component supports `>= 16` poses | `insufficient_free_space` |
+| `appearance_entropy` | Avoid one-note materials/colors. | Material and color metadata. | Category/material/color entropy or unique bins. | at least 3 material/color families when possible | `low_appearance_diversity` |
 
 ## Frame Metric Dictionary
 
@@ -108,7 +108,8 @@ Formula:
 semantic_entropy = -sum_c p(c) * log(p(c))
 ```
 
-Default threshold: pilot calibrated per scenario. Use only valid pixels and ignore unknown labels.
+Default threshold: `>= 0.75` for desk, kitchen, bathroom, and living room; `>= 1.00` for
+bookshelf/storage. Use only valid pixels and ignore unknown labels.
 
 Debug visualization: semantic mask plus class histogram.
 
@@ -159,6 +160,25 @@ visual_delta_approx = w_rgb * mean_abs_rgb_difference
                     + w_obj * visible_object_set_distance
 ```
 
+Default weights:
+
+```text
+w_rgb = 0.25
+w_depth = 0.25
+w_sem = 0.25
+w_obj = 0.25
+```
+
+Initial gates:
+
+```text
+0.015 <= adjacent_visual_delta <= 0.18
+first_to_last_visual_delta >= 0.12
+```
+
+The review band is `0.008-0.015` or `0.18-0.25` for adjacent delta and `0.08-0.12` for
+first-to-last delta.
+
 Later versions should replace approximations with surface-level change metrics using surface ids
 and pixel-to-3D correspondence.
 
@@ -179,10 +199,11 @@ translation_delta_t = norm(position_t+1 - position_t)
 rotation_delta_t = angle(relative_rotation_t)
 ```
 
-Initial local bounds: translation `1-5 cm` per frame; rotation `1-3 degrees` per frame.
+Initial local bounds: translation `1-5 cm` per frame; rotation `1-3 degrees` per frame; linear
+acceleration `<= 0.03 m/frame^2`; angular acceleration `<= 2 degrees/frame^2`.
 
-Initial global bounds: total displacement `>= 0.10-0.20 m` for translational primitives or
-accumulated yaw/pitch `>= 8-15 degrees` for scan primitives.
+Initial global bounds: total displacement `>= 0.12 m` for translational primitives or accumulated
+yaw/pitch `>= 10 degrees` for scan primitives.
 
 Reject reasons: `pose_jump`, `pose_change_too_small`, `pose_acceleration_too_high`.
 
@@ -199,7 +220,8 @@ new_object_ratio = pixels or ids visible after t=0 but not visible at t=0
 new_surface_ratio = surface pixels visible after t=0 but not visible at t=0
 ```
 
-Version 0 approximation: visible object set change and semantic mask change.
+Version 0 approximation: at least one new/lost visible object or at least `20%` object-pixel
+reweighting, plus semantic mask change.
 
 Version 1 requirement: object instance coverage and surface coverage.
 

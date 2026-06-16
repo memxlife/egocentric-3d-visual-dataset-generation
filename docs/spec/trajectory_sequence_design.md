@@ -119,10 +119,10 @@ Initial motion ranges:
 | clip length | 32-64 frames |
 | per-frame translation | 1-5 cm |
 | per-frame rotation | 1-3 degrees |
-| max linear acceleration | calibrated from pilot, reject obvious velocity jumps |
-| max angular acceleration | calibrated from pilot, reject abrupt look jumps |
-| minimum total displacement | 0.10-0.20 m for translational primitives |
-| minimum accumulated yaw/pitch | 8-15 degrees for scan primitives |
+| max linear acceleration | 0.03 m/frame^2 pass, 0.03-0.05 review |
+| max angular acceleration | 2 deg/frame^2 pass, 2-4 review |
+| minimum total displacement | 0.12 m for translational primitives |
+| minimum accumulated yaw/pitch | 10 degrees for scan primitives |
 
 The trajectory should avoid:
 
@@ -132,6 +132,9 @@ The trajectory should avoid:
 - abrupt orientation changes;
 - camera clipping through geometry;
 - near-plane collisions.
+
+These values are starting hypotheses. Their justification and too-low/too-high failure modes are
+defined in [Quantitative Requirements](quantitative_requirements.md).
 
 ## Motion Primitive Library
 
